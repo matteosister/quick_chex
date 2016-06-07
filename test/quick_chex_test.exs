@@ -7,7 +7,7 @@ defmodule QuickChexTest do
     assert 2 + 2 == 4
   end
 
-  property "the truth 2" do
-    assert 1 + 1 == 2
+  prop "the truth 2", generators: [test1: int, test2: int], iterations: 10 do
+    assert var!(test1) > var!(test2)
   end
 end
