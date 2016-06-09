@@ -3,15 +3,14 @@ defmodule QuickChex.Generators do
   a module to generate data to be used in properties
   """
   def int do
-    fn ->
-      1..100
-      |> Enum.random
-    end
+    1..100
+    |> Enum.random
   end
 
   def binary(size) do
-    fn ->
-      String.duplicate("a", size)
-    end
+    String.duplicate("a", size)
+  end
+  def binary(from, to) do
+    String.duplicate("a", Enum.random(from..to))
   end
 end
