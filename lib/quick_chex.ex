@@ -72,6 +72,7 @@ defmodule QuickChex do
     end
   end
 
+  @doc false
   def missing_property_error_message(property_name, properties) do
     msg = "You are trying to check a property named :#{property_name} "
       <> "but a property with such name is not defined."
