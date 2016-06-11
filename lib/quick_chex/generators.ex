@@ -13,29 +13,67 @@ defmodule QuickChex.Generators do
   @doc """
   generates a non negative integer bound to a min and a max value
 
-  iex> num = QuickChex.Generators.non_neg_integer(1, 2)
-  ...> num >= 1 and num <= 2
-  true
+  ## Examples
+
+      iex> num = QuickChex.Generators.non_neg_integer(1, 2)
+      ...> num >= 1 and num <= 2
+      true
   """
   def non_neg_integer(min_value, max_value) do
     min_value..max_value
     |> Enum.random
   end
 
+  @doc """
+  generates a binary of random size
+  """
   def binary do
-    String.duplicate("q", Enum.random(1..100))
+    binary(non_neg_integer)
   end
+
+  @doc """
+  generates a binary of the given size
+  """
   def binary(size) do
     binary(size, size)
   end
+
+  @doc """
+  generates a binary of size between `min_size` and `max_size`
+  """
   def binary(min_size, max_size) do
-    String.duplicate("q", pick_number(min_size, max_size))
+    ''
+    |> do_binary(pick_number(min_size, max_size))
+    |> Enum.join("")
   end
 
+  defp do_binary(acc, 0), do: acc
+  defp do_binary(acc, size) do
+    do_binary(acc ++ [pick_letter], size - 1)
+  end
+
+  @doc """
+  generates a list of size `size` and fill it with the generator supplied
+
+  ## Examples
+
+      iex> import QuickChex.Generators
+      ...> list = QuickChex.Generators.list({:non_neg_integer, nil, nil}, 10)
+      ...> length(list) === 10
+      true
+
+      iex> import QuickChex.Generators
+      ...> list = list({:non_neg_integer, nil, [1, 2]}, 10)
+      ...> Enum.all?(list, &is_number/1)
+      true
+  """
   def list(generator, size) do
     list(generator, size, size)
   end
 
+  @doc """
+  same as list/2, but generate it with a size between `min_size` and `max_size`
+  """
   def list(generator, min_size, max_size) do
     1..pick_number(min_size, max_size)
     |> Enum.map(fn _ -> call_generator(generator) end)
@@ -49,4 +87,6 @@ defmodule QuickChex.Generators do
   defp pick_number(min_value, max_value) do
     min_value..max_value |> Enum.random
   end
+
+  defp pick_letter, do: 65..122 |> Enum.random
 end
