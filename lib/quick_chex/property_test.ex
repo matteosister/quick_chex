@@ -1,4 +1,6 @@
 defmodule QuickChex.PropertyTest do
+  @moduledoc false
+
   alias QuickChex.PropertyTest
 
   defstruct \
@@ -12,15 +14,15 @@ defmodule QuickChex.PropertyTest do
   end
 
   def add_generators(property_test, generators) do
-    %{ property_test | generators: generators }
+    %{property_test | generators: generators}
   end
 
   def add_implies(property_test, implies) do
-    %{ property_test | implies: implies }
+    %{property_test | implies: implies}
   end
 
   def set_iterations(property_test, iterations) do
-    %{ property_test | iterations: iterations }
+    %{property_test | iterations: iterations}
   end
 
   def has_property?(%PropertyTest{generators: generators}, name) do
@@ -61,6 +63,5 @@ defmodule QuickChex.PropertyTest do
     else
       apply(QuickChex.Generators, generator, args)
     end
-
   end
 end
