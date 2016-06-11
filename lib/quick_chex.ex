@@ -78,7 +78,7 @@ defmodule QuickChex do
     {similar, _} = properties
     |> Enum.map(&to_string/1)
     |> Enum.map(&({&1, String.jaro_distance(&1, property_name)}))
-    |> Enum.max_by(fn {p_name, distance} -> distance end)
+    |> Enum.max_by(fn {_, distance} -> distance end)
 
     msg <> " Do you mean :#{similar}?"
   end
