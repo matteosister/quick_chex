@@ -1,81 +1,85 @@
 defmodule QuickChex do
   @moduledoc """
-  QuickChex is a library for property based testing
+  QuickChex is a library to do property based testing
   """
 
-  alias QuickChex.PropertyTest
-
+  @doc false
   defmacro __using__(_) do
     quote do
       import unquote(__MODULE__)
       import QuickChex.Generators
-
       ExUnit.plural_rule("property", "properties")
+
+      Module.register_attribute __MODULE__, :qc_properties, accumulate: true
     end
-  end
-
-  @doc false
-  def parse_contents(contents, property_test) do
-    contents
-    |> Macro.postwalk(property_test, fn
-      {:iterations, _, [num]}, property_test when is_number(num) ->
-        {nil, PropertyTest.set_iterations(property_test, num)}
-      {:generators, _, [generators]}, property_test ->
-        {nil, PropertyTest.add_generators(property_test, generators)}
-      {:implies, _, [implies]}, property_test ->
-        {nil, PropertyTest.add_implies(property_test, implies)}
-      v, property_test ->
-        {v, property_test}
-    end)
-  end
-
-  @doc false
-  def extract_context_vars(contents, property_test) do
-    # extract the context vars in the remaining content
-    contents
-    |> Macro.postwalk([], fn
-      v = {var_name, _, nil}, acc ->
-        if PropertyTest.has_property?(property_test, var_name) do
-          {v, acc ++ [var_name]}
-        else
-          {v, acc}
-        end
-      v, acc -> {v, acc}
-    end)
-    |> elem(1)
-    |> Enum.uniq
   end
 
   @doc """
-  macro property to define property based tests inside an ExUnit module
+  define a property with one generated parameter
   """
-  defmacro property(message, do: contents) do
-    contents = Macro.escape(contents, unquote: true)
-
-    quote bind_quoted: [message: message, contents: contents] do
-      property_test = PropertyTest.new(message)
-
-      # Removing from function body all known structures, iterations and so no
-      {contents, property_test} = parse_contents(contents, property_test)
-
-      # extract the context vars in the remaining content
-      context_vars = extract_context_vars(contents, property_test)
-
-      # substitute the vars with the real value and register the test
-
-      values = PropertyTest.get_values(property_test, context_vars)
-      iterations_number = length(values)
-      values
-      |> Enum.reduce(1, fn iteration_values, num ->
-        contents = Macro.postwalk(contents, fn
-          v = {var_name, context, nil} ->
-            Keyword.get(iteration_values, var_name, v)
-          v -> v
-        end)
-        name = ExUnit.Case.register_test(__ENV__, :property, "#{message} - iteration #{num} of #{iterations_number}", [])
-        def unquote(name)(_), do: unquote(contents)
-        num + 1
-      end)
+  defmacro property(name, param1, do: contents) do
+    contents = Macro.escape(contents)
+    param1 = Macro.escape(param1)
+    quote bind_quoted: [name: name, param1: param1, contents: contents] do
+      @qc_properties name
+      func_name = "quick_chex_property_#{name}" |> String.to_atom
+      def unquote(func_name)(unquote(param1)) do
+        unquote(contents)
+      end
     end
+  end
+
+  @doc """
+  define a property with two generated parameters
+  """
+  defmacro property(name, param1, param2, do: contents) do
+    contents = Macro.escape(contents)
+    param1 = Macro.escape(param1)
+    param2 = Macro.escape(param2)
+    quote bind_quoted: [name: name, param1: param1, param2: param2, contents: contents] do
+      @qc_properties name
+      func_name = "quick_chex_property_#{name}" |> String.to_atom
+      def unquote(func_name)(unquote(param1), unquote(param2)) do
+        unquote(contents)
+      end
+    end
+  end
+
+  @doc """
+  check a property with the given settings
+  """
+  defmacro check(name, settings) do
+    generators = Macro.escape settings[:with]
+    iterations = settings[:iterations] || 10
+    quote bind_quoted: [name: name, settings: settings, generators: generators, iterations: iterations] do
+      func_name = "quick_chex_property_#{name}" |> String.to_atom
+      if Module.defines?(__MODULE__, {func_name, length(generators)}) do
+        1..iterations
+        |> Enum.map(fn num ->
+          test_func_name = ExUnit.Case.register_test(__ENV__, :property,
+            "#{name} - iteration #{num}", [])
+          def unquote(test_func_name)(_) do
+            apply(__MODULE__, unquote(func_name), unquote(generators))
+          end
+        end)
+      else
+        test_func_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
+        def unquote(test_func_name)(_) do
+          property_name = unquote(name) |> to_string
+          raise missing_property_error_message(property_name, @qc_properties)
+        end
+      end
+    end
+  end
+
+  def missing_property_error_message(property_name, properties) do
+    msg = "You are trying to check a property named :#{property_name} "
+      <> "but a property with such name is not defined."
+    {similar, _} = properties
+    |> Enum.map(&to_string/1)
+    |> Enum.map(&({&1, String.jaro_distance(&1, property_name)}))
+    |> Enum.max_by(fn {p_name, distance} -> distance end)
+
+    msg <> " Do you mean :#{similar}?"
   end
 end

@@ -1,60 +1,38 @@
-defmodule QuickChexTest do
-  use ExUnit.Case
-  doctest QuickChex
+defmodule QuickChex.QuickChexTest do
+  use ExUnit.Case, async: true
   use QuickChex
 
-  defmodule TestModule do
-    def append(s, what \\ "?"), do: s <> what
-    def sum(n1, n2), do: n1 + n2
+  defmodule Test do
+    def add(a, b), do: a + b
+    def concat(a, b), do: a <> b
   end
 
-  property "basic example with 'generators' keyword" do
-    generators test1: binary(1, 100)
-
-    assert is_binary(TestModule.append(test1))
+  property :add_commutative, a, b do
+    r1 = Test.add(a, b)
+    r2 = Test.add(b, a)
+    assert r1 === r2
   end
 
-  property "change the iterations number with 'iterations'" do
-    iterations 20
-    generators num1: non_neg_integer, num2: non_neg_integer
-
-    assert num1 < (TestModule.sum(num1, num2))
-    assert num2 < (TestModule.sum(num1, num2))
+  property :add_zero, a do
+    r1 = Test.add(a, 0)
+    assert a === r1
   end
 
-  property "use 'implies' to limit the test properties" do
-    iterations 20
-    generators num1: non_neg_integer(1, 10), num2: non_neg_integer(1, 10)
-    implies num1 <= 5 and num2 > 5
-
-    assert num1 < num2
-    num3 = num1 + num2
-    assert num3 > 5
+  property :add_twice_one_is_equal_to_two, num do
+    r1 = num |> Test.add(1) |> Test.add(1)
+    r2 = num |> Test.add(2)
+    assert r1 === r2
   end
 
-  property "list generator" do
-    iterations 20
-    generators list1: list(non_neg_integer, 10, 20)
+  check :add_commutative,
+    with: [non_neg_integer, non_neg_integer],
+    iterations: 100
 
-    assert length(list1) >= 10
-    assert length(list1) <= 20
-  end
+  check :add_zero,
+    with: [non_neg_integer],
+    iterations: 100
 
-  property "list generator, with args" do
-    iterations 20
-    generators list1: list(non_neg_integer(1, 10), 10, 20)
-
-    assert length(list1) >= 10
-    assert length(list1) <= 20
-    assert Enum.all? list1, fn (v) -> 1 <= v and v <= 10 end
-  end
-
-  property "list with implies" do
-    iterations 5
-    generators list1: list(non_neg_integer, 10)
-    implies Enum.all?(list1, &(&1 >= 50))
-
-    assert length(list1) === 10
-    assert Enum.all? list1, fn (v) -> v >= 50 end
-  end
+  check :add_twice_one_is_equal_to_two,
+    with: [non_neg_integer],
+    iterations: 100
 end
