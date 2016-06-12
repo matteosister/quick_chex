@@ -49,26 +49,29 @@ defmodule QuickChex do
   check a property with the given settings
   """
   defmacro check(name, settings) do
-    generators = Macro.escape(settings[:with], unquote: true)
+    generators = settings
+    |> Keyword.get(:with)
+    |> Macro.escape
     iterations = settings[:iterations] || 10
+
     quote bind_quoted: [name: name, settings: settings, generators: generators,
     iterations: iterations] do
       func_name = "quick_chex_property_#{name}" |> String.to_atom
-
-      # if Module.defines?(__MODULE__, {func_name, length(generators)}) do
       1..iterations
       |> Enum.map(fn num ->
         test_func_name = ExUnit.Case.register_test(__ENV__, :property,
           "#{name} - iteration #{num}", [])
         def unquote(test_func_name)(_) do
           generators = unquote(generators)
-          if is_list(generators) do
-            apply(__MODULE__, unquote(func_name), generators)
-          else
+          if is_function(generators) do
             apply(__MODULE__, unquote(func_name), generators.())
+          else
+            apply(__MODULE__, unquote(func_name), generators)
           end
         end
       end)
+
+      # if Module.defines?(__MODULE__, {func_name, length(generators)}) do
       # else
       #   test_func_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
       #   def unquote(test_func_name)(_) do
@@ -80,14 +83,31 @@ defmodule QuickChex do
   end
 
   @doc false
-  def missing_property_error_message(property_name, properties) do
-    msg = "You are trying to check a property named :#{property_name} "
-      <> "but a property with such name is not defined."
-    {similar, _} = properties
-    |> Enum.map(&to_string/1)
-    |> Enum.map(&({&1, String.jaro_distance(&1, property_name)}))
-    |> Enum.max_by(fn {_, distance} -> distance end)
+  # def function_setup_correct(module, func_name, generators) do
+  #   IO.inspect func_name
+  #   IO.inspect length(generators)
+  #   func_exists = module.__info__(:functions)
+  #   |> IO.inspect
+  #   |> Enum.any?(fn {name, arity} ->
+  #     func_name === name and length(generators) === arity
+  #   end)
+  #   #|> IO.inspect
+  #   if func_exists do
+  #     {:ok, nil}
+  #   else
+  #     {:error, missing_property_error_message(func_name, Module.get_attribute(module, :qc_properties))}
+  #   end
+  # end
 
-    msg <> " Do you mean :#{similar}?"
-  end
+  @doc false
+  # def missing_property_error_message(property_name, properties) do
+  #   msg = "You are trying to check a property named :#{property_name} "
+  #     <> "but a property with such name is not defined."
+  #   {similar, _} = properties
+  #   |> Enum.map(&to_string/1)
+  #   |> Enum.map(&({&1, String.jaro_distance(&1, property_name)}))
+  #   |> Enum.max_by(fn {_, distance} -> distance end)
+  #
+  #   msg <> " Do you mean :#{similar}?"
+  # end
 end
