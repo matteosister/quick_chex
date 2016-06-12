@@ -49,26 +49,33 @@ defmodule QuickChex do
   check a property with the given settings
   """
   defmacro check(name, settings) do
-    generators = Macro.escape settings[:with]
+    generators = Macro.escape(settings[:with], unquote: true)
     iterations = settings[:iterations] || 10
-    quote bind_quoted: [name: name, settings: settings, generators: generators, iterations: iterations] do
+    quote bind_quoted: [name: name, settings: settings, generators: generators,
+    iterations: iterations] do
       func_name = "quick_chex_property_#{name}" |> String.to_atom
-      if Module.defines?(__MODULE__, {func_name, length(generators)}) do
-        1..iterations
-        |> Enum.map(fn num ->
-          test_func_name = ExUnit.Case.register_test(__ENV__, :property,
-            "#{name} - iteration #{num}", [])
-          def unquote(test_func_name)(_) do
-            apply(__MODULE__, unquote(func_name), unquote(generators))
-          end
-        end)
-      else
-        test_func_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
+
+      # if Module.defines?(__MODULE__, {func_name, length(generators)}) do
+      1..iterations
+      |> Enum.map(fn num ->
+        test_func_name = ExUnit.Case.register_test(__ENV__, :property,
+          "#{name} - iteration #{num}", [])
         def unquote(test_func_name)(_) do
-          property_name = unquote(name) |> to_string
-          raise missing_property_error_message(property_name, @qc_properties)
+          generators = unquote(generators)
+          if is_list(generators) do
+            apply(__MODULE__, unquote(func_name), generators)
+          else
+            apply(__MODULE__, unquote(func_name), generators.())
+          end
         end
-      end
+      end)
+      # else
+      #   test_func_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
+      #   def unquote(test_func_name)(_) do
+      #     property_name = unquote(name) |> to_string
+      #     raise missing_property_error_message(property_name, @qc_properties)
+      #   end
+      # end
     end
   end
 

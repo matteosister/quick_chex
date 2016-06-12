@@ -28,7 +28,7 @@ defmodule QuickChex.Generators do
   generates a binary of random size
   """
   def binary do
-    binary(non_neg_integer)
+    binary(non_neg_integer(0, 100))
   end
 
   @doc """
