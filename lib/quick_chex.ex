@@ -82,7 +82,6 @@ defmodule QuickChex do
     end
   end
 
-  @doc false
   # def function_setup_correct(module, func_name, generators) do
   #   IO.inspect func_name
   #   IO.inspect length(generators)
@@ -99,7 +98,6 @@ defmodule QuickChex do
   #   end
   # end
 
-  @doc false
   # def missing_property_error_message(property_name, properties) do
   #   msg = "You are trying to check a property named :#{property_name} "
   #     <> "but a property with such name is not defined."
