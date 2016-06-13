@@ -53,9 +53,10 @@ defmodule QuickChex do
     |> Keyword.get(:with)
     |> Macro.escape
     iterations = settings[:iterations] || 10
+    only_if = settings[:only_id]
 
     quote bind_quoted: [name: name, settings: settings, generators: generators,
-    iterations: iterations] do
+    iterations: iterations, only_if: only_if] do
       func_name = "quick_chex_property_#{name}" |> String.to_atom
       1..iterations
       |> Enum.map(fn num ->
@@ -63,11 +64,12 @@ defmodule QuickChex do
           "#{name} - iteration #{num}", [])
         def unquote(test_func_name)(_) do
           generators = unquote(generators)
-          if is_function(generators) do
-            apply(__MODULE__, unquote(func_name), generators.())
-          else
-            apply(__MODULE__, unquote(func_name), generators)
-          end
+          # if is_function(generators) do
+          #   apply(__MODULE__, unquote(func_name), generators.())
+          # else
+          #   apply(__MODULE__, unquote(func_name), generators)
+          # end
+          apply(__MODULE__, unquote(func_name), calculate_args(generators, unquote(only_if)))
         end
       end)
 
@@ -80,6 +82,13 @@ defmodule QuickChex do
       #   end
       # end
     end
+  end
+
+  def calculate_args(generators, _) when is_function(generators) do
+    generators.()
+  end
+  def calculate_args(generators, _) do
+    generators
   end
 
   # def function_setup_correct(module, func_name, generators) do

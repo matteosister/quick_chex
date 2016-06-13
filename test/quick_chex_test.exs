@@ -14,7 +14,8 @@ defmodule QuickChex.QuickChexTest do
 
     check :add_commutative,
       with: [non_neg_integer, non_neg_integer],
-      iterations: 100
+      iterations: 100,
+      only_if: fn a, b -> a < 1000 and b < 1000 end
 
     property :add_zero_returns_the_same_value, a do
       assert a === Test.add(a, 0)
