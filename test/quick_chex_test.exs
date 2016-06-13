@@ -7,7 +7,7 @@ defmodule QuickChex.QuickChexTest do
     def concat(a, b), do: a <> b
   end
 
-  describe "add" do
+  describe "Test.add function" do
     property :add_commutative, a, b do
       assert Test.add(a, b) === Test.add(b, a)
     end
@@ -15,7 +15,12 @@ defmodule QuickChex.QuickChexTest do
     check :add_commutative,
       with: [non_neg_integer, non_neg_integer],
       iterations: 100,
-      only_if: fn a, b -> a < 1000 and b < 1000 end
+      only_if: fn num1, num2 -> num1 > num2 end
+
+    check :add_commutative, "add commutative, 2",
+      with: [non_neg_integer, non_neg_integer],
+      iterations: 100,
+      only_if: fn num1, num2 -> num1 > num2 end
 
     property :add_zero_returns_the_same_value, a do
       assert a === Test.add(a, 0)

@@ -2,6 +2,7 @@ defmodule QuickChex do
   @moduledoc """
   QuickChex is a library to do property based testing
   """
+  import QuickChex.Generators
 
   @doc false
   defmacro __using__(_) do
@@ -46,30 +47,25 @@ defmodule QuickChex do
   end
 
   @doc """
-  check a property with the given settings
+  check a property by giving a property name and a keyword list of settings
   """
-  defmacro check(name, settings) do
+  defmacro check(name, check_name \\ nil, settings) do
     generators = settings
     |> Keyword.get(:with)
     |> Macro.escape
     iterations = settings[:iterations] || 10
-    only_if = settings[:only_id]
+    only_if = settings[:only_if]
 
-    quote bind_quoted: [name: name, settings: settings, generators: generators,
-    iterations: iterations, only_if: only_if] do
+    quote bind_quoted: [name: name, check_name: check_name, settings: settings,
+    generators: generators, iterations: iterations, only_if: only_if] do
       func_name = "quick_chex_property_#{name}" |> String.to_atom
       1..iterations
       |> Enum.map(fn num ->
         test_func_name = ExUnit.Case.register_test(__ENV__, :property,
-          "#{name} - iteration #{num}", [])
+          register_name(name, check_name, num), [])
+        args = calculate_args(generators, only_if)
         def unquote(test_func_name)(_) do
-          generators = unquote(generators)
-          # if is_function(generators) do
-          #   apply(__MODULE__, unquote(func_name), generators.())
-          # else
-          #   apply(__MODULE__, unquote(func_name), generators)
-          # end
-          apply(__MODULE__, unquote(func_name), calculate_args(generators, unquote(only_if)))
+          apply(__MODULE__, unquote(func_name), unquote(args))
         end
       end)
 
@@ -84,11 +80,33 @@ defmodule QuickChex do
     end
   end
 
-  def calculate_args(generators, _) when is_function(generators) do
-    generators.()
+  def register_name(name, nil, iteration_num) do
+    "#{name} - iteration #{iteration_num}"
   end
-  def calculate_args(generators, _) do
-    generators
+  def register_name(name, check_name, iteration_num) do
+    "#{name} - #{check_name} - iteration #{iteration_num}"
+  end
+
+  def calculate_args(generators = {:fn, _, _}, _) do
+    {func, _} = Code.eval_quoted(generators, [], __ENV__)
+    func.()
+  end
+  def calculate_args(generators, nil) do
+    {values, _} = Code.eval_quoted(generators, [], __ENV__)
+    values
+  end
+  def calculate_args(generators, check_function) do
+    do_calculate_args(:next, generators, check_function)
+  end
+  defp do_calculate_args({:ok, values}, _, _), do: values
+  defp do_calculate_args(:next, generators, check_function) do
+    {values, _} = Code.eval_quoted(generators, [], __ENV__)
+    res = if apply(check_function, values) do
+      {:ok, values}
+    else
+      :next
+    end
+    do_calculate_args(res, generators, check_function)
   end
 
   # def function_setup_correct(module, func_name, generators) do
