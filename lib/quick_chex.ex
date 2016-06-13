@@ -1,10 +1,24 @@
 defmodule QuickChex do
   @moduledoc """
-  QuickChex is a library to do property based testing
-  """
-  import QuickChex.Generators
+  main module with the main macros that you should use when writing
+  tests.
 
-  @doc false
+  Check the docs for the single methods for examples and use cases.
+  """
+  import QuickChex.Generators, warn: false
+
+  @doc """
+  add `use QuickChex` at the top of your ExUnit test module
+
+  ## Example
+
+  ```
+  defmodule MyModuleTest do
+    use ExUnit.Case, async: true
+    use QuickChex # <- add this!
+  end
+  ```
+  """
   defmacro __using__(_) do
     quote do
       import unquote(__MODULE__)
@@ -16,7 +30,28 @@ defmodule QuickChex do
   end
 
   @doc """
-  define a property with one generated parameter
+  specify a property with a single generate parameter
+
+  A property has a `name` to be identified by checks, a `param1` that will
+  be generated, and a body to specify the requirements
+
+  ## Example
+
+  for a **negate** property of a `Test.negate/1` function you could write a
+  property like this:
+
+  ```
+  property :negate, value do
+    assert not value === Test.negate(value)
+  end
+
+  property :negate_two_time_means_doing_nothing, value do
+    res = value
+    |> Test.negate
+    |> Test.negate
+    assert value === res
+  end
+  ```
   """
   defmacro property(name, param1, do: contents) do
     contents = Macro.escape(contents)
@@ -31,7 +66,17 @@ defmodule QuickChex do
   end
 
   @doc """
-  define a property with two generated parameters
+  same as property/2 with two generated parameters
+
+  ## Example
+
+  a property for the Test.add/2 function
+
+  ```
+  property :add_is_commutative, n1, n2 do
+    assert Test.add(n1, n2) === Test.add(n2, n1)
+  end
+  ```
   """
   defmacro property(name, param1, param2, do: contents) do
     contents = Macro.escape(contents)
@@ -47,7 +92,25 @@ defmodule QuickChex do
   end
 
   @doc """
-  check a property by giving a property name and a keyword list of settings
+  same as property/2 with three generated parameters
+  """
+  defmacro property(name, param1, param2, param3, do: contents) do
+    contents = Macro.escape(contents)
+    param1 = Macro.escape(param1)
+    param2 = Macro.escape(param2)
+    param3 = Macro.escape(param3)
+    quote bind_quoted: [name: name, param1: param1, param2: param2,
+    param3: param3, contents: contents] do
+      @qc_properties name
+      func_name = "quick_chex_property_#{name}" |> String.to_atom
+      def unquote(func_name)(unquote(param1), unquote(param2), unquote(param3)) do
+        unquote(contents)
+      end
+    end
+  end
+
+  @doc """
+  check a property by giving the property name and a list of settings
   """
   defmacro check(name, check_name \\ nil, settings) do
     generators = settings
@@ -80,6 +143,7 @@ defmodule QuickChex do
     end
   end
 
+  @doc false
   def register_name(name, nil, iteration_num) do
     "#{name} - iteration #{iteration_num}"
   end
@@ -87,6 +151,7 @@ defmodule QuickChex do
     "#{name} - #{check_name} - iteration #{iteration_num}"
   end
 
+  @doc false
   def calculate_args(generators = {:fn, _, _}, _) do
     {func, _} = Code.eval_quoted(generators, [], __ENV__)
     func.()

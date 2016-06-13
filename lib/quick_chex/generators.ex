@@ -5,6 +5,12 @@ defmodule QuickChex.Generators do
 
   @doc """
   generates a non negative integer number between 0 and 1_000_000
+
+  ## Examples
+
+      iex> num = QuickChex.Generators.non_neg_integer
+      ...> is_number(num) and num >= 0 and num <= 1_000_000
+      true
   """
   def non_neg_integer do
     non_neg_integer(0, 1_000_000)
@@ -16,7 +22,7 @@ defmodule QuickChex.Generators do
   ## Examples
 
       iex> num = QuickChex.Generators.non_neg_integer(1, 2)
-      ...> num >= 1 and num <= 2
+      ...> is_number(num) and num >= 1 and num <= 2
       true
   """
   def non_neg_integer(min_value, max_value) do
@@ -75,18 +81,46 @@ defmodule QuickChex.Generators do
   same as list/2, but generate it with a size between `min_size` and `max_size`
   """
   def list(generator, min_size, max_size) do
-    1..pick_number(min_size, max_size)
-    |> Enum.map(fn _ -> call_generator(generator) end)
+    min_size
+    |> pick_number(max_size)
+    |> do_list([], generator)
   end
+
+  defp do_list(0, acc, _), do: acc
+  defp do_list(size, acc, generator) do
+    do_list(size - 1, acc ++ [call_generator(generator)], generator)
+  end
+
+  @doc """
+  a boolean value
+  """
+  def bool do
+    one_of [true, false]
+  end
+
+  @doc """
+  returns one of the given values
+
+  ## Examples
+
+      iex> QuickChex.Generators.one_of([1])
+      1
+
+      iex> r = QuickChex.Generators.one_of([1, 2])
+      ...> r === 1 or r === 2
+      true
+  """
+  def one_of(list), do: list |> Enum.random
 
   defp call_generator({name, _, args}) when is_nil(args) do
     apply(__MODULE__, name, [])
   end
   defp call_generator({name, _, args}), do: apply(__MODULE__, name, args)
+  defp call_generator(value), do: value
 
   defp pick_number(min_value, max_value) do
     min_value..max_value |> Enum.random
   end
 
-  defp pick_letter, do: 65..122 |> Enum.random
+  defp pick_letter, do: one_of 65..122
 end

@@ -5,6 +5,9 @@ defmodule QuickChex.QuickChexTest do
   defmodule Test do
     def add(a, b), do: a + b
     def concat(a, b), do: a <> b
+    def multiply(a, b, c), do: a * b * c
+    def sum_tuple({a, b}), do: a + b
+    def join_lists(list1, list2), do: list1 ++ list2
   end
 
   describe "Test.add function" do
@@ -41,14 +44,51 @@ defmodule QuickChex.QuickChexTest do
       iterations: 100
   end
 
-  property :concat_the_same_string_is_commutative, value1, value2 do
-    assert Test.concat(value1, value2) === Test.concat(value2, value1)
+  describe "concat" do
+    property :concat_the_same_string_is_commutative, value1, value2 do
+      assert Test.concat(value1, value2) === Test.concat(value2, value1)
+    end
+
+    check :concat_the_same_string_is_commutative,
+      with: fn ->
+        value = binary(10)
+        [value, value]
+      end,
+      iterations: 100
   end
 
-  check :concat_the_same_string_is_commutative,
-    with: fn ->
-      value = binary(10)
-      [value, value]
-    end,
-    iterations: 100
+  describe "multiply" do
+    property :multiply_commutative, v1, v2, v3 do
+      assert Test.multiply(v1, v2, v3) === Test.multiply(v3, v2, v1)
+      assert Test.multiply(v1, v2, v3) === Test.multiply(v2, v3, v1)
+      assert Test.multiply(v1, v2, v3) === Test.multiply(v1, v3, v2)
+    end
+
+    check :multiply_commutative,
+      with: [non_neg_integer, non_neg_integer, non_neg_integer],
+      iterations: 100
+  end
+
+  describe "sum_tuple" do
+    property :sum_tuple, {a, b} do
+      assert Test.add(a, b) === Test.add(b, a)
+    end
+
+    check :sum_tuple,
+      with: [{non_neg_integer, non_neg_integer}],
+      iterations: 100
+  end
+
+  describe "join_lists" do
+    property :join_lists, list1, list2 do
+      res = Test.join_lists(list1, list2)
+      assert length(list1) + length(list2) === length(res)
+      assert Enum.all? list1, &(&1 in res)
+      assert Enum.all? list2, &(&1 in res)
+    end
+
+    check :join_lists,
+      with: [list(binary(1), 0, 1), list(binary(1), 0, 10)],
+      iterations: 100
+  end
 end
