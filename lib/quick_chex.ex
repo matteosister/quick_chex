@@ -7,6 +7,8 @@ defmodule QuickChex do
   """
   import QuickChex.Generators, warn: false
 
+  @default_iterations_number Application.get_env(:quick_chex, :iterations, 100)
+
   @doc """
   add `use QuickChex` at the top of your ExUnit test module
 
@@ -116,7 +118,7 @@ defmodule QuickChex do
     generators = settings
     |> Keyword.get(:with)
     |> Macro.escape
-    iterations = settings[:iterations] || 10
+    iterations = settings[:iterations] || @default_iterations_number
     only_if = settings[:only_if]
 
     quote bind_quoted: [name: name, check_name: check_name, settings: settings,

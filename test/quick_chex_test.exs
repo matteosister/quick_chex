@@ -10,19 +10,17 @@ defmodule QuickChex.QuickChexTest do
     def join_lists(list1, list2), do: list1 ++ list2
   end
 
-  describe "Test.add function" do
+  describe "Test.add" do
     property :add_commutative, a, b do
       assert Test.add(a, b) === Test.add(b, a)
     end
 
     check :add_commutative,
       with: [non_neg_integer, non_neg_integer],
-      iterations: 100,
       only_if: fn num1, num2 -> num1 > num2 end
 
-    check :add_commutative, "add commutative, 2",
+    check :add_commutative, "add commutative 2",
       with: [non_neg_integer, non_neg_integer],
-      iterations: 100,
       only_if: fn num1, num2 -> num1 > num2 end
 
     property :add_zero_returns_the_same_value, a do
@@ -30,8 +28,7 @@ defmodule QuickChex.QuickChexTest do
     end
 
     check :add_zero_returns_the_same_value,
-      with: [non_neg_integer],
-      iterations: 100
+      with: [non_neg_integer]
 
     property :add_twice_one_is_equal_to_two, num do
       r1 = num |> Test.add(1) |> Test.add(1)
@@ -40,11 +37,10 @@ defmodule QuickChex.QuickChexTest do
     end
 
     check :add_twice_one_is_equal_to_two,
-      with: [non_neg_integer],
-      iterations: 100
+      with: [non_neg_integer]
   end
 
-  describe "concat" do
+  describe "Test.concat" do
     property :concat_the_same_string_is_commutative, value1, value2 do
       assert Test.concat(value1, value2) === Test.concat(value2, value1)
     end
@@ -53,11 +49,10 @@ defmodule QuickChex.QuickChexTest do
       with: fn ->
         value = binary(10)
         [value, value]
-      end,
-      iterations: 100
+      end
   end
 
-  describe "multiply" do
+  describe "Test.multiply" do
     property :multiply_commutative, v1, v2, v3 do
       assert Test.multiply(v1, v2, v3) === Test.multiply(v3, v2, v1)
       assert Test.multiply(v1, v2, v3) === Test.multiply(v2, v3, v1)
@@ -65,21 +60,19 @@ defmodule QuickChex.QuickChexTest do
     end
 
     check :multiply_commutative,
-      with: [non_neg_integer, non_neg_integer, non_neg_integer],
-      iterations: 100
+      with: [non_neg_integer, non_neg_integer, non_neg_integer]
   end
 
-  describe "sum_tuple" do
+  describe "Test.sum_tuple" do
     property :sum_tuple, {a, b} do
       assert Test.add(a, b) === Test.add(b, a)
     end
 
     check :sum_tuple,
-      with: [{non_neg_integer, non_neg_integer}],
-      iterations: 100
+      with: [{non_neg_integer, non_neg_integer}]
   end
 
-  describe "join_lists" do
+  describe "Test.join_lists" do
     property :join_lists, list1, list2 do
       res = Test.join_lists(list1, list2)
       assert length(list1) + length(list2) === length(res)
@@ -88,7 +81,6 @@ defmodule QuickChex.QuickChexTest do
     end
 
     check :join_lists,
-      with: [list(binary(1), 0, 1), list(binary(1), 0, 10)],
-      iterations: 100
+      with: [list(binary(1), 0, 1), list(binary(1), 0, 10)]
   end
 end
