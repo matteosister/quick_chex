@@ -81,6 +81,6 @@ defmodule QuickChex.QuickChexTest do
     end
 
     check :join_lists,
-      with: [list(binary(1), 0, 1), list(binary(1), 0, 10)]
+      with: [list_of(binary(1), 0, 1), list_of(binary(1), 0, 10)]
   end
 end

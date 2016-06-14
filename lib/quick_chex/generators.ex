@@ -70,31 +70,31 @@ defmodule QuickChex.Generators do
   ## Examples
 
       iex> import QuickChex.Generators
-      ...> list = QuickChex.Generators.list({:non_neg_integer, nil, nil}, 10)
+      ...> list = list_of({:non_neg_integer, nil, nil}, 10)
       ...> length(list) === 10
       true
 
       iex> import QuickChex.Generators
-      ...> list = list({:non_neg_integer, nil, [1, 2]}, 10)
+      ...> list = list_of({:non_neg_integer, nil, [1, 2]}, 10)
       ...> Enum.all?(list, &is_number/1)
       true
   """
-  def list(generator, size) do
-    list(generator, size, size)
+  def list_of(generator, size) do
+    list_of(generator, size, size)
   end
 
   @doc """
   same as list/2, but generate it with a size between `min_size` and `max_size`
   """
-  def list(generator, min_size, max_size) do
+  def list_of(generator, min_size, max_size) do
     min_size
     |> pick_number(max_size)
-    |> do_list([], generator)
+    |> do_list_of([], generator)
   end
 
-  defp do_list(0, acc, _), do: acc
-  defp do_list(size, acc, generator) do
-    do_list(size - 1, acc ++ [call_generator(generator)], generator)
+  defp do_list_of(0, acc, _), do: acc
+  defp do_list_of(size, acc, generator) do
+    do_list_of(size - 1, acc ++ [call_generator(generator)], generator)
   end
 
   @doc """
