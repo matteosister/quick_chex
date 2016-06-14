@@ -84,7 +84,8 @@ defmodule QuickChex do
     contents = Macro.escape(contents)
     param1 = Macro.escape(param1)
     param2 = Macro.escape(param2)
-    quote bind_quoted: [name: name, param1: param1, param2: param2, contents: contents] do
+    quote bind_quoted: [name: name, param1: param1, param2: param2,
+    contents: contents] do
       @qc_properties name
       func_name = "quick_chex_property_#{name}" |> String.to_atom
       def unquote(func_name)(unquote(param1), unquote(param2)) do
@@ -105,7 +106,8 @@ defmodule QuickChex do
     param3: param3, contents: contents] do
       @qc_properties name
       func_name = "quick_chex_property_#{name}" |> String.to_atom
-      def unquote(func_name)(unquote(param1), unquote(param2), unquote(param3)) do
+      def unquote(func_name)(unquote(param1), unquote(param2),
+      unquote(param3)) do
         unquote(contents)
       end
     end
@@ -188,7 +190,8 @@ defmodule QuickChex do
   #   if func_exists do
   #     {:ok, nil}
   #   else
-  #     {:error, missing_property_error_message(func_name, Module.get_attribute(module, :qc_properties))}
+  #     {:error, missing_property_error_message(func_name,
+  #       Module.get_attribute(module, :qc_properties))}
   #   end
   # end
 

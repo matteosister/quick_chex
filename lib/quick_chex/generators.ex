@@ -47,15 +47,21 @@ defmodule QuickChex.Generators do
   @doc """
   generates a binary of size between `min_size` and `max_size`
   """
+  def binary(min_size, max_size) when min_size === max_size do
+    min_size
+    |> do_binary('')
+    |> to_string
+  end
   def binary(min_size, max_size) do
-    ''
-    |> do_binary(pick_number(min_size, max_size))
-    |> Enum.join("")
+    min_size
+    |> pick_number(max_size)
+    |> do_binary('')
+    |> to_string
   end
 
-  defp do_binary(acc, 0), do: acc
-  defp do_binary(acc, size) do
-    do_binary(acc ++ [pick_letter], size - 1)
+  defp do_binary(0, acc), do: acc
+  defp do_binary(size, acc) do
+    do_binary(size - 1, acc ++ [pick_letter])
   end
 
   @doc """
@@ -112,15 +118,18 @@ defmodule QuickChex.Generators do
   """
   def one_of(list), do: list |> Enum.random
 
-  defp call_generator({name, _, args}) when is_nil(args) do
+  @doc false
+  def call_generator({name, _, args}) when is_nil(args) do
     apply(__MODULE__, name, [])
   end
-  defp call_generator({name, _, args}), do: apply(__MODULE__, name, args)
-  defp call_generator(value), do: value
+  def call_generator({name, _, args}), do: apply(__MODULE__, name, args)
+  def call_generator(value), do: value
 
-  defp pick_number(min_value, max_value) do
+  @doc false
+  def pick_number(min_value, max_value) do
     min_value..max_value |> Enum.random
   end
 
-  defp pick_letter, do: one_of 65..122
+  @doc false
+  def pick_letter, do: one_of(Enum.concat(?A..?Z, ?a..?z))
 end

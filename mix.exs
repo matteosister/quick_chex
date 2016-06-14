@@ -7,6 +7,7 @@ defmodule QuickChex.Mixfile do
      elixir: "~> 1.3-rc",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     source_url: "https://github.com/matteosister/quick_chex",
      description: description,
      package: package,
      deps: deps]
