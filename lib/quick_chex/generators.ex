@@ -26,12 +26,11 @@ defmodule QuickChex.Generators do
       true
   """
   def non_neg_integer(min_value, max_value) do
-    min_value..max_value
-    |> Enum.random
+    pick_number(min_value, max_value)
   end
 
   @doc """
-  generates a binary of random size
+  generates a binary of random size, between 0 and 100
   """
   def binary do
     binary(non_neg_integer(0, 100))
@@ -61,7 +60,7 @@ defmodule QuickChex.Generators do
 
   defp do_binary(0, acc), do: acc
   defp do_binary(size, acc) do
-    do_binary(size - 1, acc ++ [pick_letter])
+    do_binary(size - 1, acc ++ [letter])
   end
 
   @doc """
@@ -70,12 +69,12 @@ defmodule QuickChex.Generators do
   ## Examples
 
       iex> import QuickChex.Generators
-      ...> list = list_of({:non_neg_integer, nil, nil}, 10)
+      ...> list = list_of(:non_neg_integer, 10)
       ...> length(list) === 10
       true
 
       iex> import QuickChex.Generators
-      ...> list = list_of({:non_neg_integer, nil, [1, 2]}, 10)
+      ...> list = list_of({:non_neg_integer, [1, 2]}, 10)
       ...> Enum.all?(list, &is_number/1)
       true
   """
@@ -118,18 +117,92 @@ defmodule QuickChex.Generators do
   """
   def one_of(list), do: list |> Enum.random
 
-  @doc false
-  def call_generator({name, _, args}) when is_nil(args) do
+  @doc """
+  returns an alphabet letter in binary format
+
+  only letters from A to Z uppercase and lowercase
+
+  ## Examples
+
+      iex> Regex.match?(~r/[a-zA-Z]{1}/, QuickChex.Generators.letter)
+      true
+  """
+  def letter, do: [one_of(Enum.concat(?A..?Z, ?a..?z))] |> to_string
+
+  @doc """
+  returns a lowercase letter
+
+  ## Examples
+
+      iex> Regex.match?(~r/[a-z]{1}/, QuickChex.Generators.lowercase_letter)
+      true
+  """
+  def lowercase_letter, do: [one_of(?a..?z)] |> to_string
+
+  @doc """
+  returns an uppercase letter
+
+  ## Examples
+
+      iex> Regex.match?(~r/[A-Z]{1}/, QuickChex.Generators.uppercase_letter)
+      true
+  """
+  def uppercase_letter, do: [one_of(?A..?Z)] |> to_string
+
+  @doc """
+  returns a number from 0 to 9
+
+  ## Examples
+
+      iex> Regex.match?(~r/\\d{1}/, QuickChex.Generators.number |> to_string)
+      true
+  """
+  def number, do: one_of(0..9)
+
+  @doc """
+  returns a binary sequence with the specified generators
+
+  ## Examples
+
+      iex> v = QuickChex.Generators.binary_sequence([letter: 2, number: 3])
+      ...> Regex.match?(~r/[A-Za-z]{2}\\d{3}/, v)
+      true
+
+      iex> v = QuickChex.Generators.binary_sequence([lowercase_letter: 10,
+      ...> number: 3])
+      ...> Regex.match?(~r/[a-z]{10}\\d{3}/, v)
+      true
+
+      iex> v = QuickChex.Generators.binary_sequence([lowercase_letter: 3,
+      ...> uppercase_letter: 3])
+      ...> Regex.match?(~r/[a-z]{3}[A-Z]{3}/, v)
+      true
+  """
+  def binary_sequence(generators), do: generators |> do_sequence([])
+
+  defp do_sequence([], acc) do
+    acc
+    |> Enum.flat_map(&(&1))
+    |> Enum.map(&to_string/1)
+    |> Enum.join
+  end
+  defp do_sequence([{generator, num} | others], acc) do
+    do_sequence(others, acc ++ [call_generators(generator, num)])
+  end
+
+  defp call_generator({name, _, nil}) do
     apply(__MODULE__, name, [])
   end
-  def call_generator({name, _, args}), do: apply(__MODULE__, name, args)
-  def call_generator(value), do: value
+  defp call_generator({name, _, args}), do: apply(__MODULE__, name, args)
+  defp call_generator({name, args}), do: apply(__MODULE__, name, args)
+  defp call_generator(value) when is_atom(value), do: apply(__MODULE__, value, [])
+  defp call_generator(value), do: value
 
-  @doc false
-  def pick_number(min_value, max_value) do
-    min_value..max_value |> Enum.random
+  defp call_generators(generator, num) do
+    1..num |> Enum.map(fn _ -> call_generator(generator) end)
   end
 
-  @doc false
-  def pick_letter, do: one_of(Enum.concat(?A..?Z, ?a..?z))
+  defp pick_number(min_value, max_value) do
+    min_value..max_value |> Enum.random
+  end
 end
