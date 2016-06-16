@@ -1,6 +1,11 @@
 # QuickChex
 
-**TODO: Add description**
+This is a elixir library to do property based testing.
+
+Please report any bugs or ideas you may have...this is a work in progress, not
+sure if this is gonna really happen.
+
+It needs elixir 1.3.0
 
 ## Installation
 
@@ -10,7 +15,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:quick_chex, "~> 0.0.1"}]
+      [{:quick_chex, "~> 0.3"}]
     end
     ```
 
@@ -21,4 +26,3 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
       [applications: [:quick_chex]]
     end
     ```
-
