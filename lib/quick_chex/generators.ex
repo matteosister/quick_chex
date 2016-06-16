@@ -160,7 +160,10 @@ defmodule QuickChex.Generators do
   def number, do: one_of(0..9)
 
   @doc """
-  returns a binary sequence with the specified generators
+  generate a binary sequence with a pattern
+
+  with this function you can generate a sequence of characters by invoking
+  other generators
 
   ## Examples
 
