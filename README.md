@@ -1,6 +1,6 @@
 # QuickChex
 
-This is a elixir library to do property based testing.
+This is an elixir library to do property based testing.
 
 Please report any bugs or ideas you may have...this is a work in progress, not
 sure if this is gonna really happen.
