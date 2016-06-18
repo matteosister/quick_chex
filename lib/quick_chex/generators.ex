@@ -64,7 +64,15 @@ defmodule QuickChex.Generators do
   end
 
   @doc """
-  generates a list of size `size` and fill it with the generator supplied
+  generates a list of random size (0..1_000) and fill it with the supplied
+  generator
+  """
+  def list_of(generator) do
+    list_of(generator, 0, 1_000)
+  end
+
+  @doc """
+  generates a list of size `size` and fill it with the supplied generator
 
   ## Examples
 
@@ -199,7 +207,13 @@ defmodule QuickChex.Generators do
   defp call_generator({name, _, args}), do: apply(__MODULE__, name, args)
   defp call_generator({name, args}), do: apply(__MODULE__, name, args)
   defp call_generator(value) when is_atom(value), do: apply(__MODULE__, value, [])
-  defp call_generator(value), do: value
+  defp call_generator(value) do
+    raise "You have passed the value #{inspect value} as a generator,
+      You should pass an :atom for calling a generator without arguments,
+      or a tuple with an atom and a list of args, to call a generator with params.
+      For example the tuple {:non_neg_integer, [1, 20]} will generate a
+      non negative integer between 1 and 20"
+  end
 
   defp call_generators(generator, num) do
     1..num |> Enum.map(fn _ -> call_generator(generator) end)

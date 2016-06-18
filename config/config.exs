@@ -1,4 +1,4 @@
 use Mix.Config
 
 config :quick_chex,
-  iterations: 30
+  iterations: 50

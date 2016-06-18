@@ -23,6 +23,7 @@ defmodule QuickChex do
   """
   defmacro __using__(_) do
     quote do
+      use ExUnit.Case, async: true
       import unquote(__MODULE__)
       import QuickChex.Generators
       ExUnit.plural_rule("property", "properties")
