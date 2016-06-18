@@ -135,15 +135,6 @@ defmodule QuickChex do
           apply(__MODULE__, unquote(func_name), unquote(args))
         end
       end)
-
-      # if Module.defines?(__MODULE__, {func_name, length(generators)}) do
-      # else
-      #   test_func_name = ExUnit.Case.register_test(__ENV__, :property, name, [])
-      #   def unquote(test_func_name)(_) do
-      #     property_name = unquote(name) |> to_string
-      #     raise missing_property_error_message(property_name, @qc_properties)
-      #   end
-      # end
     end
   end
 
@@ -177,32 +168,4 @@ defmodule QuickChex do
     end
     do_calculate_args(res, generators, check_function)
   end
-
-  # def function_setup_correct(module, func_name, generators) do
-  #   IO.inspect func_name
-  #   IO.inspect length(generators)
-  #   func_exists = module.__info__(:functions)
-  #   |> IO.inspect
-  #   |> Enum.any?(fn {name, arity} ->
-  #     func_name === name and length(generators) === arity
-  #   end)
-  #   #|> IO.inspect
-  #   if func_exists do
-  #     {:ok, nil}
-  #   else
-  #     {:error, missing_property_error_message(func_name,
-  #       Module.get_attribute(module, :qc_properties))}
-  #   end
-  # end
-
-  # def missing_property_error_message(property_name, properties) do
-  #   msg = "You are trying to check a property named :#{property_name} "
-  #     <> "but a property with such name is not defined."
-  #   {similar, _} = properties
-  #   |> Enum.map(&to_string/1)
-  #   |> Enum.map(&({&1, String.jaro_distance(&1, property_name)}))
-  #   |> Enum.max_by(fn {_, distance} -> distance end)
-  #
-  #   msg <> " Do you mean :#{similar}?"
-  # end
 end
