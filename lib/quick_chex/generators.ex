@@ -63,6 +63,21 @@ defmodule QuickChex.Generators do
     do_binary(size - 1, acc ++ [letter])
   end
 
+  def random_list do
+    random_list(non_neg_integer(1, 5), non_neg_integer(5, 10))
+  end
+
+  def random_list(size) do
+    random_list(size, size)
+  end
+
+  def random_list(min_size, max_size) do
+    0..pick_number(min_size, max_size)
+    |> Enum.map(fn _ -> random_generator end)
+    |> Enum.map(&call_generator/1)
+  end
+
+
   @doc """
   generates a list of random size (0..1_000) and fill it with the supplied
   generator
@@ -221,5 +236,10 @@ defmodule QuickChex.Generators do
 
   defp pick_number(min_value, max_value) do
     min_value..max_value |> Enum.random
+  end
+
+  defp random_generator do
+    [:binary, :non_neg_integer, {:list_of, [:binary, 0, 10]}, :bool]
+    |> Enum.random
   end
 end
