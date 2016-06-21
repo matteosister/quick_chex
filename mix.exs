@@ -4,7 +4,7 @@ defmodule QuickChex.Mixfile do
   def project do
     [app: :quick_chex,
      version: "0.3.0",
-     elixir: "~> 1.3-rc",
+     elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      source_url: "https://github.com/matteosister/quick_chex",
