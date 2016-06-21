@@ -3,6 +3,8 @@ defmodule QuickChex.Generators do
   a module to generate data to be used in properties
   """
 
+  @type generator :: {atom, list} | atom
+
   @doc """
   generates a non negative integer number between 0 and 1_000_000
 
@@ -12,6 +14,7 @@ defmodule QuickChex.Generators do
       ...> is_number(num) and num >= 0 and num <= 1_000_000
       true
   """
+  @spec non_neg_integer :: integer
   def non_neg_integer do
     non_neg_integer(0, 1_000_000)
   end
@@ -25,6 +28,7 @@ defmodule QuickChex.Generators do
       ...> is_number(num) and num >= 1 and num <= 2
       true
   """
+  @spec non_neg_integer(integer, integer) :: integer
   def non_neg_integer(min_value, max_value) do
     pick_number(min_value, max_value)
   end
@@ -32,6 +36,7 @@ defmodule QuickChex.Generators do
   @doc """
   generates a binary of random size, between 0 and 100
   """
+  @spec binary :: binary
   def binary do
     binary(non_neg_integer(0, 100))
   end
@@ -39,6 +44,7 @@ defmodule QuickChex.Generators do
   @doc """
   generates a binary of the given size
   """
+  @spec binary(integer) :: binary
   def binary(size) do
     binary(size, size)
   end
@@ -46,6 +52,7 @@ defmodule QuickChex.Generators do
   @doc """
   generates a binary of size between `min_size` and `max_size`
   """
+  @spec binary(integer, integer) :: binary
   def binary(min_size, max_size) when min_size === max_size do
     min_size
     |> do_binary('')
@@ -63,14 +70,28 @@ defmodule QuickChex.Generators do
     do_binary(size - 1, acc ++ [letter])
   end
 
+  @doc """
+  generates a random list of randomly generated values. The size is between 0
+  and 10
+  """
+  @spec random_list :: list
   def random_list do
     random_list(non_neg_integer(1, 5), non_neg_integer(5, 10))
   end
 
+  @doc """
+  generates a random list of randomly generated values with the provided size
+  """
+  @spec random_list(integer) :: list
   def random_list(size) do
     random_list(size, size)
   end
 
+  @doc """
+  generates a random list of randomly generated values with a size between the
+  min and max sizes provided
+  """
+  @spec random_list(integer, integer) :: list
   def random_list(min_size, max_size) do
     0..pick_number(min_size, max_size)
     |> Enum.map(fn _ -> random_generator end)
@@ -82,6 +103,7 @@ defmodule QuickChex.Generators do
   generates a list of random size (0..1_000) and fill it with the supplied
   generator
   """
+  @spec list_of(generator) :: list
   def list_of(generator) do
     list_of(generator, 0, 1_000)
   end
@@ -101,6 +123,7 @@ defmodule QuickChex.Generators do
       ...> Enum.all?(list, &is_number/1)
       true
   """
+  @spec list_of(generator, integer) :: list
   def list_of(generator, size) do
     list_of(generator, size, size)
   end
@@ -108,6 +131,7 @@ defmodule QuickChex.Generators do
   @doc """
   same as list/2, but generate it with a size between `min_size` and `max_size`
   """
+  @spec list_of(generator, integer, integer) :: list
   def list_of(generator, min_size, max_size) do
     min_size
     |> pick_number(max_size)
@@ -122,6 +146,7 @@ defmodule QuickChex.Generators do
   @doc """
   a boolean value
   """
+  @spec bool :: boolean
   def bool do
     one_of [true, false]
   end
@@ -138,6 +163,7 @@ defmodule QuickChex.Generators do
       ...> r === 1 or r === 2
       true
   """
+  @spec one_of(list) :: any
   def one_of(list), do: list |> Enum.random
 
   @doc """
@@ -150,6 +176,7 @@ defmodule QuickChex.Generators do
       iex> Regex.match?(~r/[a-zA-Z]{1}/, QuickChex.Generators.letter)
       true
   """
+  @spec letter :: binary
   def letter, do: [one_of(Enum.concat(?A..?Z, ?a..?z))] |> to_string
 
   @doc """
@@ -160,6 +187,7 @@ defmodule QuickChex.Generators do
       iex> Regex.match?(~r/[a-z]{1}/, QuickChex.Generators.lowercase_letter)
       true
   """
+  @spec lowercase_letter :: binary
   def lowercase_letter, do: [one_of(?a..?z)] |> to_string
 
   @doc """
@@ -170,6 +198,7 @@ defmodule QuickChex.Generators do
       iex> Regex.match?(~r/[A-Z]{1}/, QuickChex.Generators.uppercase_letter)
       true
   """
+  @spec uppercase_letter :: binary
   def uppercase_letter, do: [one_of(?A..?Z)] |> to_string
 
   @doc """
@@ -180,6 +209,7 @@ defmodule QuickChex.Generators do
       iex> Regex.match?(~r/\\d{1}/, QuickChex.Generators.number |> to_string)
       true
   """
+  @spec number :: integer
   def number, do: one_of(0..9)
 
   @doc """
@@ -204,6 +234,7 @@ defmodule QuickChex.Generators do
       ...> Regex.match?(~r/[a-z]{3}[A-Z]{3}/, v)
       true
   """
+  @spec binary_sequence([generator]) :: binary
   def binary_sequence(generators), do: generators |> do_sequence([])
 
   defp do_sequence([], acc) do
@@ -221,12 +252,14 @@ defmodule QuickChex.Generators do
   end
   defp call_generator({name, _, args}), do: apply(__MODULE__, name, args)
   defp call_generator({name, args}), do: apply(__MODULE__, name, args)
-  defp call_generator(value) when is_atom(value), do: apply(__MODULE__, value, [])
+  defp call_generator(value) when is_atom(value) do
+    apply(__MODULE__, value, [])
+  end
   defp call_generator(value) do
     raise "You have passed the value #{inspect value} as a generator,
       You should pass an :atom for calling a generator without arguments,
-      or a tuple with an atom and a list of args, to call a generator with params.
-      For example the tuple {:non_neg_integer, [1, 20]} will generate a
+      or a tuple with an atom and a list of args, to call a generator with
+      params. For example the tuple {:non_neg_integer, [1, 20]} will generate a
       non negative integer between 1 and 20"
   end
 

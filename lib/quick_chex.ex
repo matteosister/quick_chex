@@ -1,26 +1,22 @@
 defmodule QuickChex do
   @moduledoc """
-  main module with the main macros that you should use when writing
+  main module with the main macros that you can use when writing property-based
   tests.
 
-  Check the docs for the single methods for examples and use cases.
+  add `use QuickChex` at the top of your ExUnit test module
+
+  ## Example
+
+      defmodule MyModuleTest do
+        use ExUnit.Case, async: true
+        use QuickChex # <- add this!
+      end
   """
   import QuickChex.Generators, warn: false
 
   @default_iterations_number Application.get_env(:quick_chex, :iterations, 100)
 
-  @doc """
-  add `use QuickChex` at the top of your ExUnit test module
-
-  ## Example
-
-  ```
-  defmodule MyModuleTest do
-    use ExUnit.Case, async: true
-    use QuickChex # <- add this!
-  end
-  ```
-  """
+  @doc false
   defmacro __using__(_) do
     quote do
       import unquote(__MODULE__)
@@ -115,6 +111,39 @@ defmodule QuickChex do
 
   @doc """
   check a property by giving the property name and a list of settings
+
+  settings:
+
+    * **with** a *list* of generators (or values) to be passed to the property.
+      **Be careful!** the number of generators **must** match the number of
+      arguments of the property
+    * **iterations** *integer* representing the number of iterations
+    * **only_if** a *function* with the same arity as the number of generators
+      in the with settings.
+      If the function resturns true than the generated values are considered
+      acceptable for the property, otherwise another attempt is made until a
+      suitable array of values is found. Use this with caution, as it could slow
+      down your test suite considerably.
+
+  *a full example*
+
+      check :my_property,
+        with: [non_neg_integer, non_neg_integer],
+        itarations: 100,
+        only_if: fn num1, num2 -> num1 > num2 end
+
+  this checks a property with two non negative integer args. The *only_if*
+  function ensures that the first number is greater than the second one.
+
+  usually there is a better approach
+
+      check :my_property,
+        with: [{:non_neg_integer, [0, 1000], {:non_neg_integer, [1001, 2000]}],
+        itarations: 100
+
+  by better specifying the generators we can omit the only_if block and speed up
+  our test suite. Use the only_if block only if generator constraints are not
+  enough.
   """
   defmacro check(name, check_name \\ nil, settings) do
     generators = settings

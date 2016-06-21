@@ -14,12 +14,10 @@ This library is a tool to automate property-based testing within ExUnit
 
 Create a test module as you normally do with ExUnit
 
-```
-defmodule EnumTest do
-  use ExUnit.Case, async: true
-  use QuickChex # <- add this line to import all the QuickChex features
-end
-```
+    defmodule EnumTest do
+      use ExUnit.Case, async: true
+      use QuickChex # <- add this line to import all the QuickChex features
+    end
 
 ## Let's test the Enum module
 
@@ -33,16 +31,14 @@ We can reason about it, and end up by thinking: *sorting should be idempotent!*
 Sorting a list one time should be the same as sorting 2 times. So we can write
 our first property
 
-```
-defmodule EnumTest do
-  use ExUnit.Case, async: true
-  use QuickChex
+    defmodule EnumTest do
+      use ExUnit.Case, async: true
+      use QuickChex
 
-  property :double_sort, list do
-    assert list |> Enum.sort === list |> Enum.sort |> Enum.sort
-  end
-end
-```
+      property :double_sort, list do
+        assert list |> Enum.sort === list |> Enum.sort |> Enum.sort
+      end
+    end
 
 we are defining a property by giving it the name *:double_sort* (it could also
 be a string), passing the variable we will test (a list) and then implement a
@@ -51,20 +47,18 @@ sorting two times**
 
 Now it's time to check the property
 
-```
-defmodule EnumTest do
-  use ExUnit.Case, async: true
-  use QuickChex
+    defmodule EnumTest do
+      use ExUnit.Case, async: true
+      use QuickChex
 
-  property :double_sort, list do
-    assert list |> Enum.sort === list |> Enum.sort |> Enum.sort
-  end
+      property :double_sort, list do
+        assert list |> Enum.sort === list |> Enum.sort |> Enum.sort
+      end
 
-  check :double_sort,
-    with: [list_of(:binary, 5, 10)],
-    iterations: 50
-end
-```
+      check :double_sort,
+        with: [list_of(:binary, 5, 10)],
+        iterations: 50
+    end
 
 We define a **check** by passing the property name (:double_sort) and the
 [generators](https://hexdocs.pm/quick_chex/QuickChex.Generators.html) to be
@@ -73,13 +67,11 @@ Then we specify the number of iterations.
 
 We are all set! We now just need to run **mix test** from the console
 
-```
-$ mix test
+    $ mix test
 
-..................................................
+    ..................................................
 
-Finished in 0.7 seconds
-50 properties, 0 failures
-```
+    Finished in 0.7 seconds
+    50 properties, 0 failures
 
 we have 50 passing tests with random list of strings. Easy!
