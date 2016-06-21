@@ -1,13 +1,21 @@
 defmodule QuickChex.EnumExamplesTest do
+  use ExUnit.Case, async: true
   use QuickChex
 
   describe "Enum.sort" do
-    property :enum_sort, l do
-      assert l |> Enum.sort == l |> Enum.sort |> Enum.sort
+    property :double_sort, l do
+      assert l |> Enum.sort === l |> Enum.sort |> Enum.sort
     end
 
-    check :enum_sort,
-      with: [list_of(:binary, 0, 10)]
+    check :double_sort,
+      with: [list_of({:binary, [0,5]}, 0, 10)]
+
+    property :enum_sort_empty, l do
+      assert l |> Enum.sort == l
+    end
+
+    check :enum_sort_empty,
+      with: [list_of(:non_neg_integer, 0)]
   end
 
   describe "Enum.reverse" do

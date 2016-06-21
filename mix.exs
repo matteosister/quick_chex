@@ -10,7 +10,8 @@ defmodule QuickChex.Mixfile do
      source_url: "https://github.com/matteosister/quick_chex",
      description: description,
      package: package,
-     deps: deps]
+     deps: deps,
+     docs: docs]
   end
 
   defp description do
@@ -45,5 +46,12 @@ defmodule QuickChex.Mixfile do
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/matteosister/quick_chex"}
     ]
+  end
+
+  defp docs do
+    [main: "getting-started",
+     extras: [
+        "docs/Getting Started.md"
+    ]]
   end
 end
