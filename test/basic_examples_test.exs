@@ -23,6 +23,9 @@ defmodule QuickChex.BasicExamplesTest do
       with: [non_neg_integer, non_neg_integer],
       only_if: fn num1, num2 -> num1 > num2 end
 
+    check :add_commutative, "add rationals",
+      with: [non_neg_rational, non_neg_rational]
+
     property :add_zero_returns_the_same_value, a do
       assert a === Test.add(a, 0)
     end
@@ -38,6 +41,9 @@ defmodule QuickChex.BasicExamplesTest do
 
     check :add_twice_one_is_equal_to_two,
       with: [non_neg_integer]
+
+    check :add_twice_one_is_equal_to_two, "rationals",
+      with: [non_neg_rational]
   end
 
   describe "Test.concat" do
@@ -61,6 +67,7 @@ defmodule QuickChex.BasicExamplesTest do
 
     check :multiply_commutative,
       with: [non_neg_integer, non_neg_integer, non_neg_integer]
+
   end
 
   describe "Test.sum_tuple" do
@@ -70,6 +77,9 @@ defmodule QuickChex.BasicExamplesTest do
 
     check :sum_tuple,
       with: [{non_neg_integer, non_neg_integer}]
+
+    check :sum_tuple, "rationals",
+      with: [{non_neg_rational, non_neg_rational}]
   end
 
   describe "Test.join_lists" do

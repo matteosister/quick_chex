@@ -30,7 +30,39 @@ defmodule QuickChex.Generators do
   """
   @spec non_neg_integer(integer, integer) :: integer
   def non_neg_integer(min_value, max_value) do
-    pick_number(min_value, max_value)
+    pick_number(min_value, max_value) |> abs
+  end
+
+  @doc """
+  generates a non negative rational bound to a min and a max value
+  using :rand.uniform for the decimal representation
+
+  ### Examples
+
+    iex> num = QuickChex.Generators.non_neg_rational
+    ...> is_number(num) and num >= 0 and num <= 1_000_000
+    true
+  """
+  @spec non_neg_rational :: float
+  def non_neg_rational do
+    non_neg_rational(0, 1_000_000, 2)
+  end
+
+  @doc """
+  generates a non negative rational of a given precision
+  bound to a min and a max value, using :rand.uniform
+  for the decimal representation
+
+  ### Examples
+
+    iex> num = QuickChex.Generators.non_neg_rational(1, 5, 2)
+    ...> is_number(num) and num >= 0 and num <= 1_000_000
+    true
+  """
+  @spec non_neg_rational(integer, integer, integer) :: float
+  def non_neg_rational(min_value, max_value, max_precision) do
+    (min_value + (max_value - min_value) * :rand.uniform)
+    |> Float.round(max_precision)
   end
 
   @doc """
