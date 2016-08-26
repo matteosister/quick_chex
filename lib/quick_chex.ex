@@ -17,12 +17,12 @@ defmodule QuickChex do
   @default_iterations_number Application.get_env(:quick_chex, :iterations, 100)
 
   @doc false
-  defmacro __using__(_) do
+  defmacro __using__(_opts) do
     quote do
       import unquote(__MODULE__)
       import QuickChex.Generators
-      ExUnit.plural_rule("property", "properties")
 
+      ExUnit.plural_rule("property", "properties")
       Module.register_attribute __MODULE__, :qc_properties, accumulate: true
     end
   end

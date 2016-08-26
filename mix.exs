@@ -5,6 +5,7 @@ defmodule QuickChex.Mixfile do
     [app: :quick_chex,
      version: "0.4.0",
      elixir: "~> 1.3",
+     elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      source_url: "https://github.com/matteosister/quick_chex",
@@ -13,6 +14,9 @@ defmodule QuickChex.Mixfile do
      deps: deps,
      docs: docs]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp description do
     "property based testing for elixir"
