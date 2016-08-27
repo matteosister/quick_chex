@@ -4,7 +4,7 @@ defmodule QuickChex.Formatter do
   """
   use GenEvent
 
-  def handle_event({:test_finished, test = %ExUnit.Test{state: {:failed, failures}, tags: %{args: args}}}, _) do
+  def handle_event({:test_finished, %ExUnit.Test{state: {:failed, _failures}, tags: %{args: args}}}, _) do
     IO.puts "Failed params:\n"
     args
     |> Stream.map(&inspect/1)
