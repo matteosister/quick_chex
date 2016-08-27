@@ -10,6 +10,8 @@ This library is a tool to automate property-based testing within ExUnit
 
 **QuickChex requires Elixir 1.3.0**
 
+[![Build Status](https://semaphoreci.com/api/v1/matteosister/quick_chex/branches/master/badge.svg)](https://semaphoreci.com/matteosister/quick_chex)
+
 ## How to use
 
 Create a test module as you normally do with ExUnit

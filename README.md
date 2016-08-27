@@ -1,5 +1,7 @@
 # QuickChex
 
+[![Build Status](https://semaphoreci.com/api/v1/matteosister/quick_chex/branches/master/badge.svg)](https://semaphoreci.com/matteosister/quick_chex)
+
 This is an elixir library to do property based testing.
 
 Please report any bugs or ideas you may have...this is a work in progress, not
