@@ -55,7 +55,8 @@ defmodule QuickChex.Mixfile do
   defp docs do
     [main: "getting-started",
      extras: [
-        "docs/Getting Started.md"
+        "docs/Getting Started.md",
+        "docs/Generators.md"
     ]]
   end
 end
