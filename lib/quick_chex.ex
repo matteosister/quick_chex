@@ -161,6 +161,7 @@ defmodule QuickChex do
         args = calculate_args(generators, only_if)
         test_func_name = ExUnit.Case.register_test(__ENV__, :property,
           register_name(name, check_name, num), [[args: args]])
+        args = args |> Macro.escape
         def unquote(test_func_name)(_) do
           apply(__MODULE__, unquote(func_name), unquote(args))
         end
