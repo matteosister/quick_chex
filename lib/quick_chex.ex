@@ -23,6 +23,7 @@ defmodule QuickChex do
       import QuickChex.Generators
 
       ExUnit.plural_rule("property", "properties")
+
       Module.register_attribute __MODULE__, :qc_properties, accumulate: true
     end
   end
@@ -157,9 +158,9 @@ defmodule QuickChex do
       func_name = "quick_chex_property_#{name}" |> String.to_atom
       1..iterations
       |> Enum.map(fn num ->
-        test_func_name = ExUnit.Case.register_test(__ENV__, :property,
-          register_name(name, check_name, num), [])
         args = calculate_args(generators, only_if)
+        test_func_name = ExUnit.Case.register_test(__ENV__, :property,
+          register_name(name, check_name, num), [[args: args]])
         def unquote(test_func_name)(_) do
           apply(__MODULE__, unquote(func_name), unquote(args))
         end

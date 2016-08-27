@@ -9,5 +9,7 @@ defmodule QuickChex.CustomGeneratorsTest do
   check :add_even_numbers,
     with: fn ->
       [QuickChex.CustomGenerators.even_numbers]
-    end
+    end,
+    # with: [list_of(:non_neg_integer)],
+    iterations: 1_000
 end
