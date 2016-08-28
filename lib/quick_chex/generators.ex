@@ -8,6 +8,11 @@ defmodule QuickChex.Generators do
   @doc """
   generates a non negative integer number between 0 and 1_000_000
 
+  ## How to use
+
+      check :the_property,
+        with: [non_neg_integer]
+
   ## Examples
 
       iex> num = QuickChex.Generators.non_neg_integer
@@ -21,6 +26,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   generates a non negative integer bound to a min and a max value
+
+  ## How to use
+
+      check :the_property,
+        with: [non_neg_integer(1,20)]
 
   ## Examples
 
@@ -39,6 +49,11 @@ defmodule QuickChex.Generators do
   generates a non negative rational bound to a min and a max value
   using :rand.uniform for the decimal representation
 
+  ## How to use
+
+      check :the_property,
+        with: [non_neg_rational]
+
   ### Examples
 
     iex> num = QuickChex.Generators.non_neg_rational
@@ -55,6 +70,14 @@ defmodule QuickChex.Generators do
   bound to a min and a max value, using :rand.uniform
   for the decimal representation
 
+  ## How to use
+
+      check :the_property,
+        with: [non_neg_rational(1, 20)] # from 1 to 20
+
+      check :another_property,
+        with: [non_neg_rational(1, 20, 5)] # from 1 to 20 with precision of 5
+
   ### Examples
 
     iex> num = QuickChex.Generators.non_neg_rational(1, 5, 2)
@@ -62,7 +85,7 @@ defmodule QuickChex.Generators do
     true
   """
   @spec non_neg_rational(integer, integer, integer) :: float
-  def non_neg_rational(min_value, max_value, max_precision) do
+  def non_neg_rational(min_value, max_value, max_precision \\ 2) do
     min_value
     |> Kernel.+(max_value - min_value)
     |> Kernel.*(:rand.uniform)
@@ -71,6 +94,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   generates a binary of random size, between 0 and 100
+
+  ## How to use
+
+      check :the_property,
+        with: [binary]
   """
   @spec binary :: binary
   def binary do
@@ -79,6 +107,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   generates a binary of the given size
+
+  ## How to use
+
+      check :the_property,
+        with: [binary(10)]
   """
   @spec binary(integer) :: binary
   def binary(size) do
@@ -87,6 +120,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   generates a binary of size between `min_size` and `max_size`
+
+  ## How to use
+
+      check :the_property,
+        with: [binary(1,1_000)]
   """
   @spec binary(integer, integer) :: binary
   def binary(min_size, max_size) when min_size === max_size do
@@ -109,6 +147,11 @@ defmodule QuickChex.Generators do
   @doc """
   generates a random list of randomly generated values. The size is between 0
   and 10
+
+  ## How to use
+
+      check :the_property,
+        with: [random_list]
   """
   @spec random_list :: list
   def random_list do
@@ -117,6 +160,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   generates a random list of randomly generated values with the provided size
+
+  ## How to use
+
+      check :the_property,
+        with: [random_list(2)]
   """
   @spec random_list(integer) :: list
   def random_list(size) do
@@ -126,10 +174,15 @@ defmodule QuickChex.Generators do
   @doc """
   generates a random list of randomly generated values with a size between the
   min and max sizes provided
+
+  ## How to use
+
+      check :the_property,
+        with: [random_list(2, 10)]
   """
   @spec random_list(integer, integer) :: list
   def random_list(min_size, max_size) do
-    0..pick_number(min_size, max_size)
+    1..pick_number(min_size, max_size)
     |> Enum.map(fn _ -> random_generator end)
     |> Enum.map(&call_generator/1)
   end
@@ -138,6 +191,14 @@ defmodule QuickChex.Generators do
   @doc """
   generates a list of random size (0..1_000) and fill it with the supplied
   generator
+
+  ## How to use
+
+      check :the_property,
+        with: [list_of(:binary)]
+
+      check :another_property,
+        with: [list_of({:non_neg_integer, [1, 4]})]
   """
   @spec list_of(generator) :: list
   def list_of(generator) do
@@ -146,6 +207,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   generates a list of size `size` and fill it with the supplied generator
+
+  ## How to use
+
+      check :the_property,
+        with: [list_of(:binary, 10)]
 
   ## Examples
 
@@ -166,6 +232,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   same as list/2, but generate it with a size between `min_size` and `max_size`
+
+  ## How to use
+
+      check :the_property,
+        with: [list_of(:binary, 10, 20)]
   """
   @spec list_of(generator, integer, integer) :: list
   def list_of(generator, min_size, max_size) do
@@ -181,6 +252,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   a boolean value
+
+  ## How to use
+
+      check :the_property,
+        with: [bool]
   """
   @spec bool :: boolean
   def bool do
@@ -189,6 +265,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   returns one of the given values
+
+  ## How to use
+
+      check :the_property,
+        with: [one_of(1, 2, 3)] # exactly 1, 2 or 3
 
   ## Examples
 
@@ -207,6 +288,11 @@ defmodule QuickChex.Generators do
 
   only letters from A to Z uppercase and lowercase
 
+  ## How to use
+
+      check :the_property,
+        with: [letter]
+
   ## Examples
 
       iex> Regex.match?(~r/[a-zA-Z]{1}/, QuickChex.Generators.letter)
@@ -217,6 +303,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   returns a lowercase letter
+
+  ## How to use
+
+      check :the_property,
+        with: [lowercase_letter]
 
   ## Examples
 
@@ -229,6 +320,11 @@ defmodule QuickChex.Generators do
   @doc """
   returns an uppercase letter
 
+  ## How to use
+
+      check :the_property,
+        with: [uppercase_letter]
+
   ## Examples
 
       iex> Regex.match?(~r/[A-Z]{1}/, QuickChex.Generators.uppercase_letter)
@@ -239,6 +335,11 @@ defmodule QuickChex.Generators do
 
   @doc """
   returns a number from 0 to 9
+
+  ## How to use
+
+      check :the_property,
+        with: [number]
 
   ## Examples
 
@@ -253,6 +354,11 @@ defmodule QuickChex.Generators do
 
   with this function you can generate a sequence of characters by invoking
   other generators
+
+  ## How to use
+
+      check :the_property,
+        with: [binary_sequence([number: 1, lowercase_letter: 2, number: 2])]
 
   ## Examples
 

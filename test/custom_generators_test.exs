@@ -10,6 +10,5 @@ defmodule QuickChex.CustomGeneratorsTest do
     with: fn ->
       [QuickChex.CustomGenerators.even_numbers]
     end,
-    # with: [list_of(:non_neg_integer)],
     iterations: 1_000
 end
