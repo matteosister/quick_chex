@@ -111,6 +111,27 @@ defmodule QuickChex do
   end
 
   @doc """
+  same as property/2 with four generated parameters
+  """
+  @lint false
+  defmacro property(name, param1, param2, param3, param4, do: contents) do
+    contents = Macro.escape(contents)
+    param1 = Macro.escape(param1)
+    param2 = Macro.escape(param2)
+    param3 = Macro.escape(param3)
+    param4 = Macro.escape(param4)
+    quote bind_quoted: [name: name, param1: param1, param2: param2,
+    param3: param3, param4: param4, contents: contents] do
+      @qc_properties name
+      func_name = "quick_chex_property_#{name}" |> String.to_atom
+      def unquote(func_name)(unquote(param1), unquote(param2),
+      unquote(param3), unquote(param4)) do
+        unquote(contents)
+      end
+    end
+  end
+
+  @doc """
   check a property by giving the property name and a list of settings
 
   settings:

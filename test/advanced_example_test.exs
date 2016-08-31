@@ -31,4 +31,14 @@ defmodule QuickChex.AdvancedExamplesTest do
     check :map, "manual map",
       with: [%{a: non_neg_integer, b: binary(10)}]
   end
+
+  # describe "anonymous functions" do
+  #   property :anon_func, func, val, res do
+  #     assert func.(val) === res
+  #   end
+  #
+  #   check :anon_func,
+  #     with: [1, 1, 1],
+  #     iterations: 1
+  # end
 end
